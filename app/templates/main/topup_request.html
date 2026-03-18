@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Request Top-up — eSIM Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h1 style="font-size:1.4rem;font-weight:700;margin:0;">Request Subscription Top-up</h1>
+    <p style="color:var(--text-muted);font-size:0.875rem;margin:0.2rem 0 0;">
+      eSIM: <span class="esim-iccid">{{ esim.iccid }}</span>
+      {% if esim.label %} — {{ esim.label }}{% endif %}
+    </p>
+  </div>
+  <a href="{{ url_for('main.dashboard') }}" class="btn btn-sm btn-outline-secondary">← Back</a>
+</div>
+
+<div class="row">
+  <div class="col-12 col-md-7 col-lg-5">
+    <div class="card">
+      <div class="card-header">New Subscription</div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('main.request_topup', id=esim.id) }}" novalidate>
+
+          <div class="mb-3">
+            <label for="plan_name" class="form-label">Plan name</label>
+            <input type="text" class="form-control" id="plan_name" name="plan_name"
+                   value="{{ form.get('plan_name', '') }}" required
+                   placeholder="e.g. 10GB Boost">
+          </div>
+
+          <div class="mb-3">
+            <label for="data_limit_gb" class="form-label">Data limit (GB)</label>
+            <input type="number" class="form-control" id="data_limit_gb"
+                   name="data_limit_gb" step="0.1" min="0.1"
+                   value="{{ form.get('data_limit_gb', '') }}" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="start_date" class="form-label">Start date</label>
+            <input type="date" class="form-control" id="start_date"
+                   name="start_date" value="{{ form.get('start_date', '') }}" required>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

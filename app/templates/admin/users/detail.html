@@ -1,0 +1,189 @@
+{% extends 'admin/layout.html' %}
+{% from 'admin/_macros.html' import search_bar, pagination_bar, empty_state %}
+{% block title %}{{ user.full_name }} — eSIM Admin{% endblock %}
+
+{% block admin_content %}
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.list_users') }}">Users</a></li>
+    <li class="breadcrumb-item active">{{ user.full_name }}</li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{{ user.full_name }}</h1>
+    <p class="page-subtitle">{{ user.email }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.edit_user', id=user.id) }}"
+       class="btn btn-sm btn-outline-secondary">Edit</a>
+    <form method="POST"
+          action="{{ url_for('admin.delete_user', id=user.id) }}"
+          onsubmit="return confirm('Delete {{ user.full_name }}? All their eSIMs and subscriptions will also be deleted.')">
+      <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+    </form>
+  </div>
+</div>
+
+{# ── Account details card ───────────────────────────────────────────────── #}
+<div class="row mb-4">
+  <div class="col-12 col-md-6 col-lg-5">
+    <div class="card">
+      <div class="card-header">Account Details</div>
+      <div class="card-body">
+        <dl class="info-list row">
+          <dt class="col-sm-4">Role</dt>
+          <dd class="col-sm-8">
+            {% if user.is_admin %}
+              <span class="badge badge-admin">Admin</span>
+            {% else %}
+              <span class="badge badge-user">User</span>
+            {% endif %}
+          </dd>
+
+          <dt class="col-sm-4">Business</dt>
+          <dd class="col-sm-8">
+            {% if user.business %}
+              <a href="{{ url_for('admin.business_detail', id=user.business.id) }}">
+                {{ user.business.name }}
+              </a>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </dd>
+
+          <dt class="col-sm-4">eSIMs</dt>
+          <dd class="col-sm-8">{{ total_esims }}</dd>
+
+          <dt class="col-sm-4">Member since</dt>
+          <dd class="col-sm-8">{{ user.created_at.strftime('%d %b %Y') }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── eSIMs section ─────────────────────────────────────────────────────── #}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="page-title" style="font-size:1rem;">eSIMs ({{ total_esims }})</h2>
+  <a href="{{ url_for('admin.create_esim', user_id=user.id) }}"
+     class="btn btn-sm btn-outline-primary">+ Add eSIM</a>
+</div>
+
+{{ search_bar(
+     url_for('admin.user_detail', id=user.id), 'esims_q', esims_q,
+     'Search by ICCID…',
+     url_for('admin.user_detail', id=user.id)
+) }}
+
+{% if esims_pagination.total > 0 %}
+  {% for esim in esims %}
+  <div class="esim-card mb-3">
+    <div class="esim-card-header">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="fw-semibold">{{ esim.label or 'Unnamed eSIM' }}</span>
+        <span class="esim-iccid">{{ esim.iccid }}</span>
+        {% if not esim.is_confirmed %}
+          <span class="badge status-pending">Pending Approval</span>
+        {% else %}
+          <span class="badge status-{{ esim.status }}">{{ esim.status | capitalize }}</span>
+        {% endif %}
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        {% if not esim.is_confirmed %}
+        <form method="POST"
+              action="{{ url_for('admin.confirm_esim', id=esim.id) }}"
+              class="d-inline">
+          <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('admin.edit_esim', id=esim.id) }}"
+           class="btn btn-sm btn-outline-secondary">Edit</a>
+        <form method="POST"
+              action="{{ url_for('admin.delete_esim', id=esim.id) }}"
+              class="d-inline"
+              onsubmit="return confirm('Delete this eSIM and all its subscriptions?')">
+          <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+      {% if esim.subscriptions %}
+      <table class="table table-sm table-hover">
+        <thead>
+          <tr>
+            <th>Plan</th>
+            <th>Data (GB)</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sub in esim.subscriptions %}
+          <tr>
+            <td class="fw-semibold" style="color:var(--text-primary);">{{ sub.plan_name }}</td>
+            <td>{{ sub.data_limit_gb }}</td>
+            <td>{{ sub.start_date.strftime('%d %b %Y') }}</td>
+            <td>{{ sub.end_date.strftime('%d %b %Y') if sub.end_date else '—' }}</td>
+            <td>
+              {% if not sub.is_confirmed %}
+                <span class="badge status-pending">Pending</span>
+              {% else %}
+                <span class="badge status-{{ sub.status }}">{{ sub.status | capitalize }}</span>
+              {% endif %}
+            </td>
+            <td class="text-end" style="white-space:nowrap;">
+              {% if not sub.is_confirmed %}
+              <form method="POST"
+                    action="{{ url_for('admin.confirm_subscription', id=sub.id) }}"
+                    class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-success me-1">Confirm</button>
+              </form>
+              {% endif %}
+              <a href="{{ url_for('admin.edit_subscription', id=sub.id) }}"
+                 class="btn btn-sm btn-outline-secondary me-1">Edit</a>
+              <form method="POST"
+                    action="{{ url_for('admin.delete_subscription', id=sub.id) }}"
+                    class="d-inline"
+                    onsubmit="return confirm('Delete this subscription?')">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state-sm">
+        No subscriptions on this eSIM.
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card-footer">
+      <a href="{{ url_for('admin.create_subscription', esim_id=esim.id) }}"
+         class="btn btn-sm btn-outline-success">+ Add Subscription</a>
+    </div>
+  </div>
+  {% endfor %}
+
+  {{ pagination_bar(
+       esims_pagination,
+       url_for('admin.user_detail', id=user.id, esims_page=esims_pagination.prev_num, esims_q=esims_q or none),
+       url_for('admin.user_detail', id=user.id, esims_page=esims_pagination.next_num, esims_q=esims_q or none)
+  ) }}
+
+{% else %}
+  {% if esims_q %}
+  {{ empty_state('📱', 'No eSIMs matching "' ~ esims_q ~ '".', url_for('admin.user_detail', id=user.id), 'Clear search') }}
+  {% else %}
+  {{ empty_state('📱', 'No eSIMs assigned to this user yet.', url_for('admin.create_esim', user_id=user.id), 'Add first eSIM') }}
+  {% endif %}
+{% endif %}
+
+{% endblock %}

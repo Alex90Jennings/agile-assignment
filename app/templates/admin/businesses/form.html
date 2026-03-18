@@ -1,0 +1,59 @@
+{% extends 'admin/layout.html' %}
+{% set editing = business is defined and business %}
+{% block title %}{{ 'Edit Business' if editing else 'Add Business' }} — eSIM Admin{% endblock %}
+
+{% block admin_content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.list_businesses') }}">Businesses</a></li>
+    {% if editing %}
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('admin.business_detail', id=business.id) }}">{{ business.name }}</a>
+    </li>
+    {% endif %}
+    <li class="breadcrumb-item active">{{ 'Edit' if editing else 'Add Business' }}</li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <h1 class="page-title">{{ 'Edit Business' if editing else 'Add Business' }}</h1>
+</div>
+
+<div class="row">
+  <div class="col-12 col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <form method="POST"
+              action="{{ url_for('admin.edit_business', id=business.id) if editing else url_for('admin.create_business') }}"
+              novalidate>
+
+          <div class="mb-3">
+            <label for="name" class="form-label">Business name</label>
+            <input type="text" class="form-control" id="name" name="name"
+                   value="{{ form.get('name', '') }}" required autofocus>
+          </div>
+
+          <div class="mb-3">
+            <label for="registration_number" class="form-label">
+              Registration number <span class="text-muted fw-normal">(optional)</span>
+            </label>
+            <input type="text" class="form-control" id="registration_number"
+                   name="registration_number"
+                   value="{{ form.get('registration_number', '') }}"
+                   placeholder="e.g. REG-001">
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+              {{ 'Save Changes' if editing else 'Create Business' }}
+            </button>
+            <a href="{{ url_for('admin.business_detail', id=business.id) if editing else url_for('admin.list_businesses') }}"
+               class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

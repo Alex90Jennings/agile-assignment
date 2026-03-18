@@ -1,0 +1,80 @@
+{% extends 'admin/layout.html' %}
+{% set editing = esim is defined and esim %}
+{% block title %}{{ 'Edit eSIM' if editing else 'Add eSIM' }} — eSIM Admin{% endblock %}
+
+{% block admin_content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.list_users') }}">Users</a></li>
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('admin.user_detail', id=user.id) }}">{{ user.full_name }}</a>
+    </li>
+    <li class="breadcrumb-item active">{{ 'Edit eSIM' if editing else 'Add eSIM' }}</li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <h1 class="page-title">{{ 'Edit eSIM' if editing else 'Add eSIM for ' ~ user.full_name }}</h1>
+</div>
+
+<div class="row">
+  <div class="col-12 col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <form method="POST"
+              action="{{ url_for('admin.edit_esim', id=esim.id) if editing else url_for('admin.create_esim', user_id=user.id) }}"
+              novalidate>
+
+          <div class="mb-3">
+            <label for="iccid" class="form-label">ICCID</label>
+            <input type="text" class="form-control font-monospace" id="iccid"
+                   name="iccid" value="{{ form.get('iccid', '') }}"
+                   maxlength="22" required autofocus
+                   placeholder="19–22 digit identifier">
+            <div class="form-text">Unique 19–22 digit SIM card identifier.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="label" class="form-label">
+              Label <span class="text-muted fw-normal">(optional)</span>
+            </label>
+            <input type="text" class="form-control" id="label" name="label"
+                   value="{{ form.get('label', '') }}" maxlength="100"
+                   placeholder="e.g. Work Phone">
+          </div>
+
+          <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status">
+              {% for s in statuses %}
+              <option value="{{ s }}"
+                {% if form.get('status', 'active') == s %}selected{% endif %}>
+                {{ s | capitalize }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          {% if editing %}
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="is_confirmed"
+                   name="is_confirmed" value="1"
+                   {% if form.get('is_confirmed') %}checked{% endif %}>
+            <label class="form-check-label" for="is_confirmed">Confirmed (approved)</label>
+          </div>
+          {% endif %}
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+              {{ 'Save Changes' if editing else 'Add eSIM' }}
+            </button>
+            <a href="{{ url_for('admin.user_detail', id=user.id) }}"
+               class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

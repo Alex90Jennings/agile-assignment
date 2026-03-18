@@ -1,0 +1,84 @@
+{% extends 'admin/layout.html' %}
+{% from 'admin/_macros.html' import search_bar, pagination_bar, empty_state %}
+{% block title %}Users — eSIM Admin{% endblock %}
+
+{% block admin_content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Users</h1>
+    <p class="page-subtitle">
+      {{ pagination.total }} registered account{{ 's' if pagination.total != 1 else '' }}
+    </p>
+  </div>
+  <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary btn-sm">+ Add User</a>
+</div>
+
+{{ search_bar(
+     url_for('admin.list_users'), 'q', q,
+     'Search by email…',
+     url_for('admin.list_users')
+) }}
+
+<div class="card">
+  <div class="card-body p-0">
+    {% if users %}
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Business</th>
+          <th>eSIMs</th>
+          <th>Joined</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            <a href="{{ url_for('admin.user_detail', id=u.id) }}" class="fw-semibold">
+              {{ u.full_name }}
+            </a>
+          </td>
+          <td>{{ u.email }}</td>
+          <td>
+            {% if u.is_admin %}
+              <span class="badge badge-admin">Admin</span>
+            {% else %}
+              <span class="badge badge-user">User</span>
+            {% endif %}
+          </td>
+          <td>{{ u.business.name if u.business else '—' }}</td>
+          <td>{{ u.esims | length }}</td>
+          <td>{{ u.created_at.strftime('%d %b %Y') }}</td>
+          <td class="text-end" style="white-space:nowrap;">
+            <a href="{{ url_for('admin.edit_user', id=u.id) }}"
+               class="btn btn-sm btn-outline-secondary me-1">Edit</a>
+            <form method="POST"
+                  action="{{ url_for('admin.delete_user', id=u.id) }}"
+                  class="d-inline"
+                  onsubmit="return confirm('Delete {{ u.full_name }}? This will also delete all their eSIMs and subscriptions.')">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {{ pagination_bar(
+         pagination,
+         url_for('admin.list_users', page=pagination.prev_num, q=q or none),
+         url_for('admin.list_users', page=pagination.next_num, q=q or none)
+    ) }}
+    {% else %}
+    {% if q %}
+    {{ empty_state('👥', 'No users matching "' ~ q ~ '".', url_for('admin.list_users'), 'Clear search') }}
+    {% else %}
+    {{ empty_state('👥', 'No users yet.', url_for('admin.create_user'), 'Add first user') }}
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

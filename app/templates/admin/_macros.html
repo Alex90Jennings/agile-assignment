@@ -1,0 +1,89 @@
+{# ─────────────────────────────────────────────────────────────────────────
+   Admin shared macros — search bar, pagination, empty state.
+   Import in any admin template with:
+     {% from 'admin/_macros.html' import search_bar, pagination_bar, empty_state %}
+   ───────────────────────────────────────────────────────────────────────── #}
+
+
+{# ── Search bar ──────────────────────────────────────────────────────────
+   Renders a single search form above a table.
+
+   Parameters:
+     action        — form action URL
+     param_name    — name of the search query parameter (e.g. 'q', 'esim_q')
+     value         — current search value (from request.args)
+     placeholder   — input placeholder text
+     clear_url     — URL to navigate to when clearing the search
+     hidden_fields — optional dict of extra hidden fields to preserve
+                     (use when multiple search/paginated tables share a page)
+   ─────────────────────────────────────────────────────────────────────── #}
+{% macro search_bar(action, param_name, value, placeholder, clear_url,
+                    hidden_fields=none) %}
+<form method="GET" action="{{ action }}" class="mb-3">
+  {% if hidden_fields %}
+    {% for k, v in hidden_fields.items() %}
+      {% if v %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}
+    {% endfor %}
+  {% endif %}
+  <div class="input-group input-group-sm" style="max-width:380px;">
+    <input type="text" class="form-control" name="{{ param_name }}"
+           value="{{ value }}" placeholder="{{ placeholder }}"
+           aria-label="{{ placeholder }}">
+    <button class="btn btn-outline-secondary" type="submit">Search</button>
+    {% if value %}
+    <a href="{{ clear_url }}" class="btn btn-outline-secondary">Clear</a>
+    {% endif %}
+  </div>
+</form>
+{% endmacro %}
+
+
+{# ── Pagination bar ──────────────────────────────────────────────────────
+   Renders Previous/Next controls inside a .pagination-bar div.
+   Only renders if pagination.pages > 1.
+
+   Parameters:
+     pagination — SQLAlchemy Pagination object
+     prev_url   — pre-built URL for the previous page link
+     next_url   — pre-built URL for the next page link
+   ─────────────────────────────────────────────────────────────────────── #}
+{% macro pagination_bar(pagination, prev_url, next_url) %}
+{% if pagination.pages > 1 %}
+<div class="pagination-bar">
+  {% if pagination.has_prev %}
+    <a href="{{ prev_url }}" class="pagination-btn">← Previous</a>
+  {% else %}
+    <span class="pagination-btn disabled">← Previous</span>
+  {% endif %}
+  <span class="pagination-info">
+    Page {{ pagination.page }} of {{ pagination.pages }}
+  </span>
+  {% if pagination.has_next %}
+    <a href="{{ next_url }}" class="pagination-btn">Next →</a>
+  {% else %}
+    <span class="pagination-btn disabled">Next →</span>
+  {% endif %}
+</div>
+{% endif %}
+{% endmacro %}
+
+
+{# ── Empty state ─────────────────────────────────────────────────────────
+   Renders a centred empty-state block.
+
+   Parameters:
+     icon         — emoji or character to display as large icon
+     message      — plain-text message (auto-escaped)
+     action_url   — optional CTA button URL
+     action_label — optional CTA button label
+   ─────────────────────────────────────────────────────────────────────── #}
+{% macro empty_state(icon, message, action_url='', action_label='') %}
+<div class="empty-state">
+  <div class="empty-state-icon">{{ icon }}</div>
+  <p>{{ message }}</p>
+  {% if action_url and action_label %}
+  <a href="{{ action_url }}"
+     class="btn btn-outline-secondary btn-sm mt-2">{{ action_label }}</a>
+  {% endif %}
+</div>
+{% endmacro %}

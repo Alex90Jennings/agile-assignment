@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Sign In — eSIM Admin{% endblock %}
+
+{# Suppress top navbar on auth pages #}
+{% block topnav %}{% endblock %}
+
+{% block main %}
+<div class="auth-page">
+  <div class="auth-card">
+
+    <a class="auth-logo" href="{{ url_for('main.index') }}">
+      <span class="auth-logo-icon">eS</span>
+      <span class="auth-logo-name">eSIM Admin</span>
+    </a>
+
+    <div class="card">
+      <div class="card-body p-4">
+
+        {# Flash messages inside the card #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <h1 class="auth-heading">Welcome back</h1>
+        <p class="auth-subheading">Sign in to your account</p>
+
+        <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" name="email"
+                   value="{{ form.get('email', '') }}" required autofocus>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary">Sign In</button>
+          </div>
+        </form>
+
+        <div class="auth-divider"></div>
+        <p class="auth-footer-text">
+          Don't have an account?
+          <a href="{{ url_for('auth.register') }}">Create one here</a>
+        </p>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

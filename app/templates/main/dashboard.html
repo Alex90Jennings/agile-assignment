@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — eSIM Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h1 style="font-size:1.4rem;font-weight:700;margin:0;">
+      Welcome back, {{ current_user.first_name }}
+    </h1>
+    <p style="color:var(--text-muted);font-size:0.875rem;margin:0.2rem 0 0;">
+      Your eSIMs and active subscriptions
+    </p>
+  </div>
+  <a href="{{ url_for('main.request_esim') }}" class="btn btn-sm btn-primary">+ Request eSIM</a>
+</div>
+
+{% if esims %}
+  {% for esim in esims %}
+  <div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="fw-semibold" style="color:var(--text-primary);">
+          {{ esim.label or 'Unnamed eSIM' }}
+        </span>
+        <span class="esim-iccid">{{ esim.iccid }}</span>
+        {% if not esim.is_confirmed %}
+          <span class="badge status-pending">Pending Approval</span>
+        {% else %}
+          <span class="badge status-{{ esim.status }}">{{ esim.status | capitalize }}</span>
+        {% endif %}
+      </div>
+      {% if esim.is_confirmed %}
+      <a href="{{ url_for('main.request_topup', id=esim.id) }}"
+         class="btn btn-sm btn-outline-primary">+ Request Top-up</a>
+      {% endif %}
+    </div>
+
+    <div class="card-body p-0">
+      {% if esim.subscriptions %}
+      <table class="table table-sm table-hover">
+        <thead>
+          <tr>
+            <th>Plan</th>
+            <th>Data (GB)</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sub in esim.subscriptions %}
+          <tr>
+            <td class="fw-semibold" style="color:var(--text-primary);">{{ sub.plan_name }}</td>
+            <td>{{ sub.data_limit_gb }}</td>
+            <td>{{ sub.start_date.strftime('%d %b %Y') }}</td>
+            <td>{{ sub.end_date.strftime('%d %b %Y') if sub.end_date else '—' }}</td>
+            <td>
+              {% if not sub.is_confirmed %}
+                <span class="badge status-pending">Pending</span>
+              {% else %}
+                <span class="badge status-{{ sub.status }}">{{ sub.status | capitalize }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state-sm">No subscriptions on this eSIM.</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="empty-state" style="background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);">
+    <div class="empty-state-icon">📱</div>
+    <p class="fw-semibold" style="color:var(--text-primary);margin-bottom:0.25rem;">No eSIMs yet</p>
+    <p>
+      <a href="{{ url_for('main.request_esim') }}">Request your first eSIM</a>
+      or contact your administrator.
+    </p>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Profile — eSIM Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <h1 style="font-size:1.4rem;font-weight:700;margin:0;">My Profile</h1>
+  <a href="{{ url_for('main.edit_profile') }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+</div>
+
+{# ── Account Details ─────────────────────────────────────────────────────── #}
+<div class="row">
+  <div class="col-12 col-md-6 col-lg-5">
+    <div class="card">
+      <div class="card-header">Account Details</div>
+      <div class="card-body">
+        <dl class="info-list row">
+          <dt class="col-sm-4">Name</dt>
+          <dd class="col-sm-8">{{ current_user.full_name }}</dd>
+
+          <dt class="col-sm-4">Email</dt>
+          <dd class="col-sm-8">{{ current_user.email }}</dd>
+
+          <dt class="col-sm-4">Role</dt>
+          <dd class="col-sm-8">
+            {% if current_user.is_admin %}
+              <span class="badge badge-admin">Admin</span>
+            {% else %}
+              <span class="badge badge-user">User</span>
+            {% endif %}
+          </dd>
+
+          <dt class="col-sm-4">Member since</dt>
+          <dd class="col-sm-8">{{ current_user.created_at.strftime('%d %b %Y') }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Business Profile — only when user belongs to a business ─────────────── #}
+{% if current_user.business %}
+<div class="row mt-4">
+  <div class="col-12 col-md-6 col-lg-5">
+    <div class="card">
+      <div class="card-header">Business Profile</div>
+      <div class="card-body">
+        <dl class="info-list row">
+          <dt class="col-sm-5">Name</dt>
+          <dd class="col-sm-7">{{ current_user.business.name }}</dd>
+
+          <dt class="col-sm-5">Registration No.</dt>
+          <dd class="col-sm-7">
+            {{ current_user.business.registration_number or '—' }}
+          </dd>
+
+          <dt class="col-sm-5">Member since</dt>
+          <dd class="col-sm-7">
+            {{ current_user.business.created_at.strftime('%d %b %Y') }}
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

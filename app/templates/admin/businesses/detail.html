@@ -1,0 +1,117 @@
+{% extends 'admin/layout.html' %}
+{% from 'admin/_macros.html' import search_bar, pagination_bar, empty_state %}
+{% block title %}{{ business.name }} — eSIM Admin{% endblock %}
+
+{% block admin_content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.list_businesses') }}">Businesses</a></li>
+    <li class="breadcrumb-item active">{{ business.name }}</li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{{ business.name }}</h1>
+    {% if business.registration_number %}
+    <p class="page-subtitle">Reg. {{ business.registration_number }}</p>
+    {% endif %}
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.edit_business', id=business.id) }}"
+       class="btn btn-sm btn-outline-secondary">Edit</a>
+    <form method="POST"
+          action="{{ url_for('admin.delete_business', id=business.id) }}"
+          onsubmit="return confirm('Delete {{ business.name }}?')">
+      <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-12 col-md-5">
+    <div class="card">
+      <div class="card-header">Details</div>
+      <div class="card-body">
+        <dl class="info-list row">
+          <dt class="col-sm-5">Reg. Number</dt>
+          <dd class="col-sm-7">{{ business.registration_number or '—' }}</dd>
+
+          <dt class="col-sm-5">Users</dt>
+          <dd class="col-sm-7">{{ total_users }}</dd>
+
+          <dt class="col-sm-5">Created</dt>
+          <dd class="col-sm-7">{{ business.created_at.strftime('%d %b %Y') }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="page-title" style="font-size:1rem;">
+    Assigned Users ({{ total_users }})
+  </h2>
+  {% if total_users > 0 %}
+  <form method="POST"
+        action="{{ url_for('admin.delete_all_users', id=business.id) }}"
+        onsubmit="return confirm('Delete ALL users from this business? This will also remove all their eSIMs and subscriptions. This cannot be undone.');">
+    <button type="submit" class="btn btn-sm btn-outline-danger">Delete All Users</button>
+  </form>
+  {% endif %}
+</div>
+
+{{ search_bar(
+     url_for('admin.business_detail', id=business.id), 'q', q,
+     'Search by email…',
+     url_for('admin.business_detail', id=business.id)
+) }}
+
+{% if users_pagination.total > 0 %}
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in biz_users %}
+        <tr>
+          <td>
+            <a href="{{ url_for('admin.user_detail', id=u.id) }}" class="fw-semibold">
+              {{ u.full_name }}
+            </a>
+          </td>
+          <td>{{ u.email }}</td>
+          <td>
+            {% if u.is_admin %}
+              <span class="badge badge-admin">Admin</span>
+            {% else %}
+              <span class="badge badge-user">User</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {{ pagination_bar(
+         users_pagination,
+         url_for('admin.business_detail', id=business.id,
+                 page=users_pagination.prev_num, q=q or none),
+         url_for('admin.business_detail', id=business.id,
+                 page=users_pagination.next_num, q=q or none)
+    ) }}
+  </div>
+</div>
+{% else %}
+{% if q %}
+{{ empty_state('👤', 'No users matching "' ~ q ~ '".', url_for('admin.business_detail', id=business.id), 'Clear search') }}
+{% else %}
+{{ empty_state('👤', 'No users assigned to this business.') }}
+{% endif %}
+{% endif %}
+{% endblock %}

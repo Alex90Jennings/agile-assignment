@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Awaiting Confirmation — eSIM Admin{% endblock %}
+
+{# Suppress navbar — user has no accessible pages until confirmed #}
+{% block topnav %}{% endblock %}
+
+{% block main %}
+<div class="auth-page">
+  <div class="auth-card">
+
+    <a class="auth-logo" href="#">
+      <span class="auth-logo-icon">eS</span>
+      <span class="auth-logo-name">eSIM Admin</span>
+    </a>
+
+    <div class="card">
+      <div class="card-body text-center" style="padding: 2rem 1.5rem;">
+
+        <div style="font-size: 2.25rem; margin-bottom: 1rem; opacity: 0.7;">⏳</div>
+
+        <h1 class="auth-heading">Awaiting Confirmation</h1>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+          Your account has been created and is awaiting administrator
+          confirmation before full access is granted.
+        </p>
+
+        <hr class="auth-divider" style="margin: 1.25rem 0;">
+
+        <p style="font-size: 0.8rem; color: var(--text-faint); margin-bottom: 1.25rem;">
+          Please contact your administrator if you believe this is a mistake.
+        </p>
+
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary btn-sm">
+          Sign out
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

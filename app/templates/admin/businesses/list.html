@@ -1,0 +1,74 @@
+{% extends 'admin/layout.html' %}
+{% from 'admin/_macros.html' import search_bar, pagination_bar, empty_state %}
+{% block title %}Businesses — eSIM Admin{% endblock %}
+
+{% block admin_content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Businesses</h1>
+    <p class="page-subtitle">
+      {{ pagination.total }} registered organisation{{ 's' if pagination.total != 1 else '' }}
+    </p>
+  </div>
+  <a href="{{ url_for('admin.create_business') }}" class="btn btn-primary btn-sm">+ Add Business</a>
+</div>
+
+{{ search_bar(
+     url_for('admin.list_businesses'), 'q', q,
+     'Search by name…',
+     url_for('admin.list_businesses')
+) }}
+
+<div class="card">
+  <div class="card-body p-0">
+    {% if businesses %}
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Reg. Number</th>
+          <th>Users</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for biz in businesses %}
+        <tr>
+          <td>
+            <a href="{{ url_for('admin.business_detail', id=biz.id) }}" class="fw-semibold">
+              {{ biz.name }}
+            </a>
+          </td>
+          <td>{{ biz.registration_number or '—' }}</td>
+          <td>{{ biz.users | length }}</td>
+          <td>{{ biz.created_at.strftime('%d %b %Y') }}</td>
+          <td class="text-end" style="white-space:nowrap;">
+            <a href="{{ url_for('admin.edit_business', id=biz.id) }}"
+               class="btn btn-sm btn-outline-secondary me-1">Edit</a>
+            <form method="POST"
+                  action="{{ url_for('admin.delete_business', id=biz.id) }}"
+                  class="d-inline"
+                  onsubmit="return confirm('Delete {{ biz.name }}?')">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {{ pagination_bar(
+         pagination,
+         url_for('admin.list_businesses', page=pagination.prev_num, q=q or none),
+         url_for('admin.list_businesses', page=pagination.next_num, q=q or none)
+    ) }}
+    {% else %}
+    {% if q %}
+    {{ empty_state('🏢', 'No businesses matching "' ~ q ~ '".', url_for('admin.list_businesses'), 'Clear search') }}
+    {% else %}
+    {{ empty_state('🏢', 'No businesses yet.', url_for('admin.create_business'), 'Add first business') }}
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Create Account — eSIM Admin{% endblock %}
+
+{# Suppress top navbar on auth pages #}
+{% block topnav %}{% endblock %}
+
+{% block main %}
+<div class="auth-page">
+  <div class="auth-card wide">
+
+    <a class="auth-logo" href="{{ url_for('main.index') }}">
+      <span class="auth-logo-icon">eS</span>
+      <span class="auth-logo-name">eSIM Admin</span>
+    </a>
+
+    <div class="card">
+      <div class="card-body p-4">
+
+        {# Flash messages inside the card #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <h1 class="auth-heading">Create account</h1>
+        <p class="auth-subheading">Get started with eSIM Admin</p>
+
+        <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label for="first_name" class="form-label">First name</label>
+              <input type="text" class="form-control" id="first_name" name="first_name"
+                     value="{{ form.get('first_name', '') }}" required autofocus>
+            </div>
+            <div class="col-6">
+              <label for="last_name" class="form-label">Last name</label>
+              <input type="text" class="form-control" id="last_name" name="last_name"
+                     value="{{ form.get('last_name', '') }}" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" name="email"
+                   value="{{ form.get('email', '') }}" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+            <div class="form-text">
+              Must be 8+ characters with at least one letter, one number, and one special character.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="confirm_password" class="form-label">Confirm password</label>
+            <input type="password" class="form-control" id="confirm_password"
+                   name="confirm_password" required>
+          </div>
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary">Create Account</button>
+          </div>
+        </form>
+
+        <div class="auth-divider"></div>
+        <p class="auth-footer-text">
+          Already have an account?
+          <a href="{{ url_for('auth.login') }}">Sign in here</a>
+        </p>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

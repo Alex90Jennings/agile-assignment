@@ -1,0 +1,122 @@
+{% extends 'admin/layout.html' %}
+{% set editing = user is defined and user %}
+{% block title %}{{ 'Edit User' if editing else 'Add User' }} — eSIM Admin{% endblock %}
+
+{% block admin_content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.list_users') }}">Users</a></li>
+    {% if editing %}
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('admin.user_detail', id=user.id) }}">{{ user.full_name }}</a>
+    </li>
+    {% endif %}
+    <li class="breadcrumb-item active">{{ 'Edit' if editing else 'Add User' }}</li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <h1 class="page-title">{{ 'Edit User' if editing else 'Add User' }}</h1>
+</div>
+
+<div class="row">
+  <div class="col-12 col-md-7 col-lg-6">
+    <div class="card">
+      <div class="card-body">
+        <form method="POST"
+              action="{{ url_for('admin.edit_user', id=user.id) if editing else url_for('admin.create_user') }}"
+              novalidate>
+
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label for="first_name" class="form-label">First name</label>
+              <input type="text" class="form-control" id="first_name"
+                     name="first_name" value="{{ form.get('first_name', '') }}" required>
+            </div>
+            <div class="col-6">
+              <label for="last_name" class="form-label">Last name</label>
+              <input type="text" class="form-control" id="last_name"
+                     name="last_name" value="{{ form.get('last_name', '') }}" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email"
+                   name="email" value="{{ form.get('email', '') }}" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="business_id" class="form-label">Business <span class="text-muted fw-normal">(optional)</span></label>
+            <select class="form-select" id="business_id" name="business_id">
+              <option value="">— No business —</option>
+              {% for biz in businesses %}
+              <option value="{{ biz.id }}"
+                {% if form.get('business_id') | string == biz.id | string %}selected{% endif %}>
+                {{ biz.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="is_admin"
+                     name="is_admin" value="1"
+                     {% if form.get('is_admin') %}checked{% endif %}>
+              <label class="form-check-label" for="is_admin">
+                Grant admin access
+              </label>
+            </div>
+          </div>
+
+          {% if editing %}
+          <div class="mb-3">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="is_confirmed"
+                     name="is_confirmed" value="1"
+                     {% if form.get('is_confirmed') %}checked{% endif %}>
+              <label class="form-check-label" for="is_confirmed">
+                Account confirmed
+              </label>
+            </div>
+            <div class="form-text">Uncheck to place this account in the awaiting approval state.</div>
+          </div>
+          {% endif %}
+
+          <hr class="form-section-divider">
+
+          <p class="form-text mb-3" style="font-size:0.82rem;">
+            {% if editing %}
+            Leave the password fields blank to keep the existing password.
+            {% else %}
+            Password requirements: 8+ characters, one letter, one number, one special character.
+            {% endif %}
+          </p>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">
+              Password{% if editing %} <span class="text-muted fw-normal">(optional)</span>{% endif %}
+            </label>
+            <input type="password" class="form-control" id="password" name="password">
+          </div>
+
+          <div class="mb-3">
+            <label for="confirm_password" class="form-label">Confirm password</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+              {{ 'Save Changes' if editing else 'Create User' }}
+            </button>
+            <a href="{{ url_for('admin.user_detail', id=user.id) if editing else url_for('admin.list_users') }}"
+               class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
