@@ -150,6 +150,39 @@ See `docs/erd.png` for the entity-relationship diagram.
 
 ---
 
+## CI/CD Pipeline
+
+The project uses two GitHub Actions workflows located in `.github/workflows/`.
+
+### CI — `ci.yml`
+
+Runs on every push and pull request (all branches).
+
+| Step | What it does |
+|---|---|
+| Checkout | Fetches the repository |
+| Set up Python | Installs Python 3.11 |
+| Install dependencies | `pip install -r requirements.txt` |
+| Run tests | `pytest -v` against an in-memory SQLite database |
+
+No external services are needed because `TestingConfig` uses `sqlite:///:memory:`.
+
+### CD — `cd.yml`
+
+Runs only on pushes to `main`, **after** CI passes implicitly (because the push only reaches `main` once a PR is merged and green).
+
+It sends a `POST` request to the Render Deploy Hook URL, which tells Render to pull the latest commit and redeploy the service automatically.
+
+### Configuring the GitHub secret
+
+1. In Render, open your Web Service → **Settings** → **Deploy Hook** and copy the URL.
+2. In your GitHub repository go to **Settings → Secrets and variables → Actions → New repository secret**.
+3. Name it `RENDER_DEPLOY_HOOK_URL` and paste the URL.
+
+The CD workflow reads this secret as `${{ secrets.RENDER_DEPLOY_HOOK_URL }}` — it is never exposed in logs.
+
+---
+
 ## Deployment (Render + Neon)
 
 > Deployment files will be added in Stage 4.
