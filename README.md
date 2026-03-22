@@ -34,7 +34,7 @@ Built as a university assignment demonstrating relational databases, role-based 
 ### 1. Clone the repository
 
 ```bash
-git clone <repo-url>
+git clone [<repo-url>](https://github.com/Alex90Jennings/agile-assignment)
 cd assignment
 ```
 
@@ -42,8 +42,7 @@ cd assignment
 
 ```bash
 python -m venv venv
-source venv/bin/activate        # macOS / Linux
-venv\Scripts\activate           # Windows
+source venv/bin/activate || venv\Scripts\activate
 ```
 
 ### 3. Install dependencies
@@ -114,12 +113,12 @@ Tests use an in-memory SQLite database and do not touch your development databas
 ```
 assignment/
 ├── app/
-│   ├── __init__.py         # create_app() factory
-│   ├── extensions.py       # db, login_manager instances
-│   ├── models.py           # SQLAlchemy models + user_loader
-│   ├── auth/               # /auth blueprint (login, register, logout)
-│   ├── main/               # / blueprint (dashboard, profile)
-│   ├── admin/              # /admin blueprint (full CRUD) — Stage 2
+│   ├── __init__.py
+│   ├── extensions.py
+│   ├── models.py
+│   ├── auth/
+│   ├── main/
+│   ├── admin/
 │   ├── templates/
 │   └── static/
 ├── tests/
