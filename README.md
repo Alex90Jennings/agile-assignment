@@ -184,8 +184,6 @@ The CD workflow reads this secret as `${{ secrets.RENDER_DEPLOY_HOOK_URL }}` —
 
 ## Deployment (Render + Neon)
 
-> Deployment files will be added in Stage 4.
-
 1. Create a Neon PostgreSQL database and copy the connection string.
 2. Create a new Web Service on Render, connected to this repository.
 3. Set environment variables in Render:
