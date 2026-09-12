@@ -8,6 +8,14 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Hosted Postgres closes idle connections, which leaves dead ones in the pool.
+    # pool_pre_ping checks a connection before handing it out and replaces it if it
+    # has gone away; pool_recycle retires connections before the idle timeout hits.
+    # Without this, the first request after a quiet spell fails with a 500.
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+    }
 
 
 class DevelopmentConfig(Config):
