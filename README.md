@@ -31,19 +31,21 @@ The features that taught me the most were the ones the brief did not ask for: an
 
 Self-registered accounts start unconfirmed. Until an admin confirms them, they are held on a pending page, which keeps casual sign-ups out of the real data.
 
+The two roles are a requirement of the brief, not a decoration: it asks for **admin and regular users, both of whom register and log in**, where admins can perform every CRUD operation on the database tables while regular users are limited to create, read and update. Here, admins alone can reach `/admin/...`, delete records, and approve requests; regular users can read their own data, create eSIM and top-up requests, and update their profile, but never delete. The check lives in `app/admin/routes.py`, where every admin view is wrapped in a decorator that rejects non-admin accounts, and it is covered by `tests/test_permissions.py`.
+
 ---
 
 ## Try it
 
 ### On the live demo
 
-`seed.py` creates three demo accounts, all with the password `Demo@1234` (if the hosted database was seeded from an older version, check `seed.py` on that commit):
+| Account | Email | Password | What it shows |
+|---|---|---|---|
+| Admin | `admin@example.com` | `admin1234` | The admin portal, pending approvals and full CRUD |
+| User | `user@example.com` | `Demo@1234` | A regular user's eSIMs, subscriptions and requests |
+| Pending | `pending@example.com` | `Demo@1234` | The confirmation gate an unapproved account sees |
 
-| Account | Email | What it shows |
-|---|---|---|
-| Admin | `admin@example.com` | The admin portal, pending approvals and full CRUD |
-| User | `user@example.com` | A regular user's eSIMs, subscriptions and requests |
-| Pending | `pending@example.com` | The confirmation gate an unapproved account sees |
+The hosted database was seeded before the demo password changed, so the admin account still uses the older `admin1234`. Seed a database yourself with `python seed.py` and every account uses `Demo@1234`.
 
 ### On your machine
 
